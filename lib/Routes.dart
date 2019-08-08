@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 
+import 'Components/service_locator.dart';
 import 'Screens/Home/index.dart';
 import 'Screens/Login/index.dart';
 
 
 class Routes {
   Routes() {
+
     runApp(new MaterialApp(
-      title: "Dribbble Animation App",
+      title: "Login App",
       debugShowCheckedModeBanner: false,
       home: new LoginScreen(),
       onGenerateRoute: (RouteSettings settings) {

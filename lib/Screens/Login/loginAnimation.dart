@@ -1,7 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:local_auth/local_auth.dart';
 import 'dart:async';
+import 'package:task_application/Components/service_locator.dart';
 
 class StaggerAnimation extends StatelessWidget {
+  final LocalAuthentication _localAuthentication = LocalAuthentication();
+  bool _canCheckBiometric = false;
+  BuildContext appContext;
+  String _authorizedOrNot = "Not Authorized";
+  List<BiometricType> _availableBiometricTypes = List<BiometricType>();
   StaggerAnimation({Key key, this.buttonController})
       : buttonSqueezeanimation = new Tween(
           begin: 320.0,
@@ -117,14 +125,43 @@ class StaggerAnimation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    appContext = context;
     buttonController.addListener(() {
       if (buttonController.isCompleted) {
-        Navigator.pushNamed(context, "/home");
+        print('hello');
+        _authorizeNow();
+//        Navigator.pushNamed(context, "/home");
       }
     });
     return new AnimatedBuilder(
       builder: _buildAnimation,
       animation: buttonController,
     );
+  }
+  Future<void> _authorizeNow() async {
+    bool isAuthorized = false;
+    try {
+      isAuthorized = await _localAuthentication.authenticateWithBiometrics(
+        localizedReason: "Please authenticate to complete your transaction",
+        useErrorDialogs: true,
+        stickyAuth: true,
+      );
+    } on PlatformException catch (e) {
+      print(e);
+    }
+    print('wow '+ isAuthorized.toString());
+    if(isAuthorized){
+      Navigator.pushNamed(appContext, "/home");
+    }
+
+//    if (!mounted) return;
+//
+//    setState(() {
+//      if (isAuthorized) {
+//        _authorizedOrNot = "Authorized";
+//      } else {
+//        _authorizedOrNot = "Not Authorized";
+//      }
+//    });
   }
 }

@@ -10,6 +10,7 @@ import '../../Components/SignInButton.dart';
 import '../../Components/WhiteTick.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
+import 'package:local_auth/local_auth.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key key}) : super(key: key);
@@ -20,6 +21,10 @@ class LoginScreen extends StatefulWidget {
 class LoginScreenState extends State<LoginScreen>
     with TickerProviderStateMixin {
   AnimationController _loginButtonController;
+  final LocalAuthentication _localAuthentication = LocalAuthentication();
+  bool _canCheckBiometric = false;
+  String _authorizedOrNot = "Not Authorized";
+  List<BiometricType> _availableBiometricTypes = List<BiometricType>();
   var animationStatus = 0;
   @override
   void initState() {
@@ -107,6 +112,7 @@ class LoginScreenState extends State<LoginScreen>
                                           animationStatus = 1;
                                         });
                                         _playAnimation();
+                                        _authorizeNow();
                                       },
                                       child: new SignIn()),
                                 )
@@ -118,5 +124,17 @@ class LoginScreenState extends State<LoginScreen>
                     ],
                   ))),
         )));
+  }
+  Future<void> _authorizeNow() async {
+    bool isAuthorized = false;
+    try {
+      isAuthorized = await _localAuthentication.authenticateWithBiometrics(
+        localizedReason: "Please authenticate to complete your transaction",
+        useErrorDialogs: true,
+        stickyAuth: true,
+      );
+    } on PlatformException catch (e) {
+      print(e);
+    }
   }
 }
